@@ -150,7 +150,7 @@ class PreProcessVideos:
 
     # Main loop for processing all videos.
     def process_videos(self):
-        self.load_blip()
+        #self.load_blip()
         config = self.build_base_config()
 
         if not os.path.exists(self.video_directory):
@@ -164,48 +164,31 @@ class PreProcessVideos:
                 if video.endswith(self.vid_types):
                     video_path = f"{self.video_directory}/{video}"
                     video_reader = None
-
+                    
+                    # Another try catch block because decord isn't perfect.
                     try:
                         video_reader = VideoReader(video_path, ctx=cpu(0))                
                     except:
                         print(f"Error loading {video_path}. Video may be unsupported or corrupt.")
                         continue
-                    
-                    # Another try catch block because decord isn't perfect.
+
                     try:
                         num_frames = int(len(video_reader))
                         video_config = self.build_video_config(video_path, num_frames)
+
 
                         # Secondary loop that process a specified amount of prompts, selects a random frame, then appends it.
                         for i in tqdm(
                                 range(self.prompt_amount), 
                                 desc=f"Processing {os.path.basename(video_path)}"
                             ):
-                            frame_number, image = self.video_processor(
-                                video_reader, 
-                                num_frames, 
-                                self.random_start_frame
-                                )
-                            prompt = self.process_blip(image)
+                            frame_number = 0
+                            prompt = "a gif"
                             video_data = self.build_video_data(frame_number, prompt)
 
                             if self.clip_frame_data:
 
-                                # Minimum value, frame number, max value (length of entire video)
-                                max_range = len(video_reader)
-                                frame_number = sorted((0, frame_number, max_range))[1]
-
-                                frame_range = range(frame_number, max_range)
-                                frame_range_nums= list(frame_range)
-
-                                frames = video_reader.get_batch(frame_range_nums[:self.max_frames])
-
-                                out_name, save_path, save_filepath = self.get_out_paths(prompt, frame_number)
-                                
-                                self.save_video(save_path, save_filepath, frames)
-
-                                video_data['clip_path'] = save_filepath
-                                video_config["data"].append(video_data)
+                                assert False
 
                             else:
                                 video_config["data"].append(video_data)

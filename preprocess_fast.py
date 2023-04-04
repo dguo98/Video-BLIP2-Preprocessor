@@ -149,6 +149,7 @@ class PreProcessVideos:
         torchvision.io.write_video(save_filepath, frames, fps=30)
 
     # Main loop for processing all videos.
+    @profile
     def process_videos(self):
         self.load_blip()
         config = self.build_base_config()
@@ -186,7 +187,10 @@ class PreProcessVideos:
                                 num_frames, 
                                 self.random_start_frame
                                 )
+
+                            # HACK(demi): gauge 
                             prompt = self.process_blip(image)
+
                             video_data = self.build_video_data(frame_number, prompt)
 
                             if self.clip_frame_data:
